@@ -1,0 +1,49 @@
+#!/bin/bash
+
+set -euo pipefail
+script_dir="$(dirname $0)"
+cd -- "$script_dir"
+
+cd ..
+
+if [[ "$@" != 'dev' ]] && [[ "$@" != "staging" ]] && [[ "$@" != 'prod' ]]
+then
+    echo "Environment should be 'dev', 'staging' or 'prod'"
+    exit 1
+fi
+
+# build prod version of plugin fron skuads-elementor-forms directory into dist/prod
+echo "Build $@"
+
+bash bin/build "$@"
+
+echo "Copying to downloads"
+
+downloads_dir=$(realpath ../../../public/downloads)
+
+mkdir -p "$downloads_dir" 
+
+cp -r dist/"$@"/skuads-elementor-forms.zip "$downloads_dir"/skuads-elementor-forms.zip
+
+exit 0
+
+# echo "Copying to SVN"
+
+# cp -r dist/prod/skuads-elementor-forms dist/prod/trunk
+# rm -rf svn/trunk
+# mv dist/prod/trunk svn/
+
+# cd svn
+
+# version="$(grep 'Version:' trunk/skuads-elementor-forms.php | grep -oE '[^ ]+$')"
+
+# if [ -d tags/"$version" ]
+# then 
+#    svn rm tags/"$version" --force
+#    svn cp trunk tags/"$version"
+# else 
+#    svn cp trunk tags/"$version"
+# fi 
+
+# svn status | grep -E '^\?' | sed -E 's/^\? +//' | xargs svn add
+# svn status | grep -E '^\!' | sed -E 's/^\! +//' | xargs svn delete

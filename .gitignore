@@ -1,0 +1,8 @@
+/svn/
+/skuads-elementor-forms/build
+/skuads-elementor-forms/vendor
+/skuads-elementor-forms/composer.lock
+/skuads-elementor-forms/includes/settings.php
+/dist
+node_modules
+dist

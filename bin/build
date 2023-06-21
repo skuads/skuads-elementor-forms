@@ -1,0 +1,28 @@
+#!/bin/bash
+
+set -euo pipefail
+script_dir="$(dirname $0)"
+cd -- "$script_dir"
+
+cd ..
+
+if [[ "$@" != 'dev' ]] && [[ "$@" != "staging" ]] && [[ "$@" != 'prod' ]]
+then
+    echo "Environment should be 'dev', 'staging' or 'prod'"
+    exit 1
+fi
+
+echo "Building "$@""
+
+[ ! -d dist ] && mkdir dist
+[ ! -d dist/"$@" ] && mkdir dist/"$@"
+
+cd dist/"$@"
+
+cp -r ../../skuads-elementor-forms .
+cp ../../settings/"$@".php skuads-elementor-forms/includes/settings.php
+
+zip -rq skuads-elementor-forms.zip skuads-elementor-forms 
+
+cp skuads-elementor-forms.zip wordpress.zip
+

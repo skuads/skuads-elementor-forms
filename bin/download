@@ -1,0 +1,26 @@
+#!/bin/bash
+set -euo pipefail
+script_dir="$(dirname $0)"
+cd -- "$script_dir"
+
+cd ..
+
+if [ -d svn ]
+then
+    (
+        cd svn
+        svn update
+    )
+else
+    svn co https://plugins.svn.wordpress.org/skuads-elementor-forms svn
+fi
+
+rsync -vrptc --delete assets/ svn/assets/
+rsync -vrptc --delete --exclude=/settings.php trunk/ svn/trunk/
+cp settings/prod.php svn/trunk/includes/settings.php
+
+version="$(grep 'Version:' trunk/skuads-elementor-forms.php | grep -oE '[^ ]+$')"
+
+cd svn
+svn status | grep -E '^\?' | sed -r 's/^\? +//' | xargs -r -l svn add
+svn status | grep -E '^\!' | sed -r 's/^\! +//' | xargs -r -l svn delete
