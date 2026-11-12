@@ -3,13 +3,12 @@
 Plugin Name: Skuads Elementor Forms
 Description: Skuads Elementor Forms
 Author: Skuads
-Version: 0.0.1
+Version: 0.0.2
 Author URI: https://www.skuads.com
 License: GPLv2
 Plugin URI: https://www.skuads.com/
 */
 
-use ElementorPro\Modules\Forms\Submissions\Database\Entities\Form_Snapshot;
 use ElementorPro\Modules\Forms\Submissions\Database\Query as ElementorQuery;
 use ElementorPro\Modules\Forms\Submissions\Database\Repositories\Form_Snapshot_Repository;
 use SkuadsFormsHelper as GlobalSkuadsFormsHelper;
@@ -59,12 +58,21 @@ if (! class_exists('SkuadsFormsHelper')) {
 
         public static function elementorForms()
         {
-            $forms = Form_Snapshot_Repository::instance()->all();
+            $forms = [];
 
-            // For now return only as "options"
-            return $forms->map(function (Form_Snapshot $form) {
-                return $form->jsonSerialize();
-            })->values();
+            foreach (SkuadsElementorFormDiscovery::all() as $form) {
+                $forms[$form['id']] = $form;
+            }
+
+            foreach (Form_Snapshot_Repository::instance()->all() as $form) {
+                $snapshot = $form->jsonSerialize();
+
+                if (! isset($forms[$snapshot['id']])) {
+                    $forms[$snapshot['id']] = $snapshot;
+                }
+            }
+
+            return array_values($forms);
         }
 
         public static function elementorSubmissions()
@@ -156,6 +164,7 @@ if (! class_exists('SkuadsFormsHelper')) {
     }
 }
 
+require_once SkuadsFormsHelper::filePath('includes/class-skuads-elementor-form-discovery.php');
 require_once SkuadsFormsHelper::filePath('includes/settings.php');
 
 if (! class_exists('SkuadsForms')) {
