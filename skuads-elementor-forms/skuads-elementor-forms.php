@@ -3,7 +3,7 @@
 Plugin Name: Skuads Elementor Forms
 Description: Skuads Elementor Forms
 Author: Skuads
-Version: 0.0.2
+Version: 0.0.3
 Author URI: https://www.skuads.com
 License: GPLv2
 Plugin URI: https://www.skuads.com/
@@ -165,6 +165,7 @@ if (! class_exists('SkuadsFormsHelper')) {
 }
 
 require_once SkuadsFormsHelper::filePath('includes/class-skuads-elementor-form-discovery.php');
+require_once SkuadsFormsHelper::filePath('includes/class-skuads-elementor-submission-identity.php');
 require_once SkuadsFormsHelper::filePath('includes/settings.php');
 
 if (! class_exists('SkuadsForms')) {
@@ -403,6 +404,9 @@ if (! class_exists('SkuadsForms')) {
                 $formName = $record['form']['name'];
                 $fieldNames = $record['form']['fields'];
                 $values = $record['values'];
+                $submittedAt = SkuadsElementorSubmissionIdentity::submittedAt(
+                    $record['created_at_gmt'] ?? $record['created_at'] ?? $record['date'] ?? null
+                );
 
                 $fields = [];
 
@@ -420,6 +424,8 @@ if (! class_exists('SkuadsForms')) {
                     'form_id' => $formId,
                     'form_name' => $formName,
                     'fields' => $fields,
+                    'external_submission_id' => isset($record['id']) ? (string) $record['id'] : null,
+                    'submitted_at' => $submittedAt,
                 ];
             }
 
@@ -431,11 +437,14 @@ if (! class_exists('SkuadsForms')) {
             foreach ($rawFields as $id => $field) {
                 $fields[$id] = $field['value'];
             }
+            $submittedAt = SkuadsElementorSubmissionIdentity::submittedAt();
 
             return [
                 'form_id' => $formId,
                 'form_name' => $formName,
                 'fields' => $fields,
+                'external_submission_id' => null,
+                'submitted_at' => $submittedAt,
             ];
         }
 
