@@ -4,7 +4,7 @@ set -euo pipefail
 
 script_dir="$(cd -- "$(dirname -- "$0")" && pwd)"
 repository_root="$(cd -- "$script_dir/.." && pwd)"
-current_year="${1:-$(date -u +%Y)}"
+current_year="${1:-$(TZ=Europe/Paris date +%Y)}"
 
 if [[ ! "$current_year" =~ ^[0-9]{4}$ ]]; then
     echo "Year must contain exactly four digits."
