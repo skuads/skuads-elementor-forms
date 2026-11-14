@@ -2,7 +2,8 @@ name: Update copyright year
 
 on:
   schedule:
-    - cron: '0 6 1 1 *'
+    # Midnight in Europe/Paris on January 1 (CET, UTC+1).
+    - cron: '0 23 31 12 *'
   workflow_dispatch:
 
 permissions:
@@ -30,5 +31,5 @@ jobs:
           git add README.md LICENSE.md \
             skuads-elementor-forms/readme.txt \
             skuads-elementor-forms/skuads-elementor-forms.php
-          git commit -m "Update copyright year to $(date -u +%Y)"
+          git commit -m "Update copyright year to $(TZ=Europe/Paris date +%Y)"
           git push origin "HEAD:${GITHUB_REF_NAME}"
