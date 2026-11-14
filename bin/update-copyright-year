@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname -- "$0")" && pwd)"
+repository_root="$(cd -- "$script_dir/.." && pwd)"
+current_year="${1:-$(date -u +%Y)}"
+
+if [[ ! "$current_year" =~ ^[0-9]{4}$ ]]; then
+    echo "Year must contain exactly four digits."
+    exit 1
+fi
+
+files=(
+    "$repository_root/README.md"
+    "$repository_root/LICENSE.md"
+    "$repository_root/skuads-elementor-forms/readme.txt"
+    "$repository_root/skuads-elementor-forms/skuads-elementor-forms.php"
+)
+
+for file in "${files[@]}"; do
+    if ! grep -Eq 'Copyright \(C\) [0-9]{4}( to present)? Skuads\.' "$file"; then
+        echo "Copyright notice not found in $file"
+        exit 1
+    fi
+
+    COPYRIGHT_YEAR="$current_year" perl -0pi -e \
+        's/Copyright \(C\) [0-9]{4}(?: to present)? Skuads\./Copyright (C) $ENV{COPYRIGHT_YEAR} Skuads./g' \
+        "$file"
+done
+
+echo "Copyright year updated to $current_year."

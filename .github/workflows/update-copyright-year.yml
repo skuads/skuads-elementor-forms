@@ -1,0 +1,34 @@
+name: Update copyright year
+
+on:
+  schedule:
+    - cron: '0 6 1 1 *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-copyright-year:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Update the copyright year
+        run: bin/update-copyright-year
+
+      - name: Commit the updated year
+        run: |
+          if git diff --quiet; then
+            echo "The copyright year is already current."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md LICENSE.md \
+            skuads-elementor-forms/readme.txt \
+            skuads-elementor-forms/skuads-elementor-forms.php
+          git commit -m "Update copyright year to $(date -u +%Y)"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
