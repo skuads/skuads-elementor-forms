@@ -21,6 +21,7 @@ cd dist/"$@"
 
 cp -r ../../skuads-elementor-forms .
 cp ../../settings/"$@".php skuads-elementor-forms/includes/settings.php
+cp ../../LICENSE.md skuads-elementor-forms/LICENSE.md
 
 zip -rq skuads-elementor-forms.zip skuads-elementor-forms 
 

@@ -4,10 +4,17 @@ Plugin Name: Skuads Elementor Forms
 Description: Skuads Elementor Forms
 Author: Skuads
 Version: 0.0.3
-Author URI: https://www.skuads.com
-License: GPLv2
-Plugin URI: https://www.skuads.com/
+Author URI: https://skuads.com/
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+Plugin URI: https://skuads.com/
 */
+
+/*
+ * Copyright (C) 2026 to present Skuads.
+ * Created by Skuads and owned by Skuads.
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ */
 
 use ElementorPro\Modules\Forms\Submissions\Database\Query as ElementorQuery;
 use ElementorPro\Modules\Forms\Submissions\Database\Repositories\Form_Snapshot_Repository;
