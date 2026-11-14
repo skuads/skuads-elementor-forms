@@ -118,15 +118,12 @@ Before releasing a new version:
 
 ### GitHub releases
 
-The `release` GitHub Actions workflow builds the plugin on every push and
-attaches the zip to a GitHub release:
-
-- `main`: release `v<Version>`, using the `Version` header of
-  `skuads-elementor-forms.php` and the matching `readme.txt` changelog entry as
-  notes. It is marked as the latest release. Pushing `main` again without
-  changing the version replaces the zip of that release.
-- `dev`: pre-release `dev-build`, recreated on every push. It uses the
-  development endpoints and must not be installed on client websites.
+The `release` GitHub Actions workflow builds the plugin on every push to `main`
+and attaches the zip to the release `v<Version>`, using the `Version` header of
+`skuads-elementor-forms.php` and the matching `readme.txt` changelog entry as
+notes. It is marked as the latest release. Pushing `main` again without changing
+the version replaces the zip of that release. Pushes to `dev` do not create a
+release.
 
 ### Internal release helper
 

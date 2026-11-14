@@ -1,39 +1,36 @@
 name: Release plugin zip
 
-# Builds the plugin on every push to dev or main and attaches the zip to a
-# GitHub release:
-# - main: release "v<Version>" (Version header of the main plugin file),
-#   marked as the latest release. Pushing main again with the same version
-#   replaces the zip of that release.
-# - dev: pre-release "dev-build", recreated on every push. This zip uses the
-#   development endpoints and must not be installed on client websites.
+# Builds the plugin on every push to main and attaches the zip to the release
+# "v<Version>" (Version header of the main plugin file), marked as the latest
+# release. Pushing main again with the same version replaces the zip of that
+# release.
 
 on:
   push:
-    branches: [dev, main]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: release-${{ github.ref_name }}
+  group: release-main
   cancel-in-progress: false
 
 jobs:
   release:
-    if: github.ref_name == 'dev' || github.ref_name == 'main'
+    if: github.ref_name == 'main'
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
       # Not named ZIP: the zip command reads $ZIP as extra options.
-      PLUGIN_ZIP: dist/${{ github.ref_name }}/skuads-elementor-forms.zip
+      PLUGIN_ZIP: dist/main/skuads-elementor-forms.zip
     steps:
       - name: Check out the repository
         uses: actions/checkout@v5
 
       - name: Build the plugin
-        run: bash bin/build "$GITHUB_REF_NAME"
+        run: bash bin/build main
 
       - name: Read the plugin version
         run: |
@@ -44,8 +41,7 @@ jobs:
           fi
           echo "VERSION=$version" >> "$GITHUB_ENV"
 
-      - name: Publish the main release
-        if: github.ref_name == 'main'
+      - name: Publish the release
         run: |
           tag="v$VERSION"
           awk -v v="= $VERSION =" '$0 == v {found=1; next} /^= / {found=0} found' \
@@ -62,13 +58,3 @@ jobs:
               --notes-file notes.md \
               --latest
           fi
-
-      - name: Publish the dev pre-release
-        if: github.ref_name == 'dev'
-        run: |
-          gh release delete dev-build --cleanup-tag --yes > /dev/null 2>&1 || true
-          gh release create dev-build "$PLUGIN_ZIP" \
-            --target "$GITHUB_SHA" \
-            --title "Dev build $VERSION (${GITHUB_SHA::7})" \
-            --notes "Built from dev at $GITHUB_SHA. Uses the development endpoints: do not install on client websites." \
-            --prerelease
