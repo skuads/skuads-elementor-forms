@@ -1,7 +1,6 @@
 === Skuads Elementor Forms ===
 Contributors: skuads
 Tags: skuads, elementor, forms, crm, leads
-Plugin URI: https://skuads.com/
 Requires at least: 4.6
 Tested up to: 5.9.2
 Stable tag: 0.0.3

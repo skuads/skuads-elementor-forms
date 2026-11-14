@@ -7,7 +7,6 @@ Version: 0.0.3
 Author URI: https://skuads.com/
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
-Plugin URI: https://skuads.com/
 */
 
 /*
