@@ -17,7 +17,7 @@ fi
 
 rsync -vrptc --delete assets/ svn/assets/
 rsync -vrptc --delete --exclude=/settings.php trunk/ svn/trunk/
-cp settings/prod.php svn/trunk/includes/settings.php
+cp settings/main.php svn/trunk/includes/settings.php
 
 version="$(grep 'Version:' trunk/skuads-elementor-forms.php | grep -oE '[^ ]+$')"
 

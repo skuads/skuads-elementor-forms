@@ -6,13 +6,13 @@ cd -- "$script_dir"
 
 cd ..
 
-if [[ "$@" != 'dev' ]] && [[ "$@" != "staging" ]] && [[ "$@" != 'prod' ]]
+if [[ "$@" != 'dev' ]] && [[ "$@" != 'main' ]]
 then
-    echo "Environment should be 'dev', 'staging' or 'prod'"
+    echo "Environment should be 'dev' or 'main'"
     exit 1
 fi
 
-# build prod version of plugin fron skuads-elementor-forms directory into dist/prod
+# build the plugin from the skuads-elementor-forms directory into dist/<environment>
 echo "Build $@"
 
 bash bin/build "$@"
@@ -29,9 +29,9 @@ exit 0
 
 # echo "Copying to SVN"
 
-# cp -r dist/prod/skuads-elementor-forms dist/prod/trunk
+# cp -r dist/main/skuads-elementor-forms dist/main/trunk
 # rm -rf svn/trunk
-# mv dist/prod/trunk svn/
+# mv dist/main/trunk svn/
 
 # cd svn
 

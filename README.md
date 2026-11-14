@@ -18,7 +18,7 @@ Elementor submissions.
 - Manually synchronizes the 30 most recent submissions.
 - Includes stable submission identifiers and normalized UTC timestamps to prevent
   duplicate leads during repeated manual synchronizations.
-- Provides separate development, staging, and production API configurations.
+- Provides separate API configurations for the `dev` and `main` environments.
 
 ## Requirements
 
@@ -60,7 +60,9 @@ Build the plugin for the required environment from the repository root:
 bin/build dev
 ```
 
-Valid environments are `dev`, `staging`, and `prod`.
+Valid environments are `dev` and `main`, matching the repository branches:
+`dev` uses the development endpoints and `main` uses the production Skuads
+application (app.skuads.com).
 
 The command creates:
 
@@ -95,13 +97,13 @@ find skuads-elementor-forms tests settings -name '*.php' -print0 \
 Create a production archive with:
 
 ```bash
-bin/build prod
+bin/build main
 ```
 
 The release archive is written to:
 
 ```text
-dist/prod/skuads-elementor-forms.zip
+dist/main/skuads-elementor-forms.zip
 ```
 
 Before releasing a new version:
