@@ -26,7 +26,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
-      ZIP: dist/${{ github.ref_name }}/skuads-elementor-forms.zip
+      # Not named ZIP: the zip command reads $ZIP as extra options.
+      PLUGIN_ZIP: dist/${{ github.ref_name }}/skuads-elementor-forms.zip
     steps:
       - name: Check out the repository
         uses: actions/checkout@v5
@@ -52,10 +53,10 @@ jobs:
           [ -s notes.md ] || echo "Skuads Elementor Forms $VERSION" > notes.md
 
           if gh release view "$tag" > /dev/null 2>&1; then
-            gh release upload "$tag" "$ZIP" --clobber
+            gh release upload "$tag" "$PLUGIN_ZIP" --clobber
             gh release edit "$tag" --notes-file notes.md --latest
           else
-            gh release create "$tag" "$ZIP" \
+            gh release create "$tag" "$PLUGIN_ZIP" \
               --target "$GITHUB_SHA" \
               --title "Skuads Elementor Forms $VERSION" \
               --notes-file notes.md \
@@ -66,7 +67,7 @@ jobs:
         if: github.ref_name == 'dev'
         run: |
           gh release delete dev-build --cleanup-tag --yes > /dev/null 2>&1 || true
-          gh release create dev-build "$ZIP" \
+          gh release create dev-build "$PLUGIN_ZIP" \
             --target "$GITHUB_SHA" \
             --title "Dev build $VERSION (${GITHUB_SHA::7})" \
             --notes "Built from dev at $GITHUB_SHA. Uses the development endpoints: do not install on client websites." \
