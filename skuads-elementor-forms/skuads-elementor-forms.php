@@ -3,7 +3,7 @@
 Plugin Name: Skuads Elementor Forms
 Description: Skuads Elementor Forms
 Author: Skuads
-Version: 0.0.3
+Version: 0.0.4
 Author URI: https://skuads.com/
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -101,7 +101,9 @@ if (! class_exists('SkuadsFormsHelper')) {
         {
 
             $feedbackAvailable = get_transient(self::SLUG."-feedback_message_{$section}");
-            if (empty($_GET['page']) || $_GET['page'] !== self::SLUG || empty($feedbackAvailable)) {
+            // Read-only check of the current admin page, no data is processed.
+            $page = isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            if ($page !== self::SLUG || empty($feedbackAvailable)) {
                 return '';
             }
 
@@ -199,10 +201,10 @@ if (! class_exists('SkuadsForms')) {
 
         public function init_settings()
         {
-            register_setting(SkuadsFormsHelper::OPTIONS_GROUP, SkuadsFormsHelper::SAVED, 'empty');
+            register_setting(SkuadsFormsHelper::OPTIONS_GROUP, SkuadsFormsHelper::SAVED, 'absint');
             register_setting(SkuadsFormsHelper::OPTIONS_GROUP, SkuadsFormsHelper::SITE_KEY, [$this, 'sanitise_site_key']);
             register_setting(SkuadsFormsHelper::OPTIONS_GROUP, SkuadsFormsHelper::API_TOKEN, [$this, 'sanitise_api_key']);
-            register_setting(SkuadsFormsHelper::OPTIONS_GROUP, SkuadsFormsHelper::FORMS, 'empty');
+            register_setting(SkuadsFormsHelper::OPTIONS_GROUP, SkuadsFormsHelper::FORMS, [$this, 'sanitise_forms']);
             register_setting(SkuadsFormsHelper::OPTIONS_GROUP, SkuadsFormsHelper::CONNECTED, 'intval');
             register_setting(SkuadsFormsHelper::OPTIONS_GROUP, SkuadsFormsHelper::ENABLED, 'intval');
             register_setting(SkuadsFormsHelper::OPTIONS_GROUP, SkuadsFormsHelper::AUTOSYNC, 'intval');
@@ -222,15 +224,17 @@ if (! class_exists('SkuadsForms')) {
 
         public function configuration_notice()
         {
-            if (get_option(SkuadsFormsHelper::CONNECTED) && $_GET['page'] !== SkuadsFormsHelper::SLUG) {
+            // Read-only check of the current admin page, no data is processed.
+            $page = isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+            if (get_option(SkuadsFormsHelper::CONNECTED) && $page !== SkuadsFormsHelper::SLUG) {
                 return;
             }
 
-            echo implode("\n", [
-                '<div class="notice notice-error is-dismissible">',
-                '<p>You need to complete your Skuads Forms set-up <a href="admin.php?page='.SkuadsFormsHelper::SLUG.'">Complete set-up</a></p>',
-                '</div>',
-            ]);
+            printf(
+                '<div class="notice notice-error is-dismissible"><p>You need to complete your Skuads Forms set-up <a href="%s">Complete set-up</a></p></div>',
+                esc_url(admin_url('admin.php?page='.SkuadsFormsHelper::SLUG))
+            );
         }
 
         public function post_webhook($record, $handler = null)
@@ -260,6 +264,12 @@ if (! class_exists('SkuadsForms')) {
 
         public function sync_manually()
         {
+            if (! current_user_can('manage_options')) {
+                wp_die(esc_html('You are not allowed to do this.'), 403);
+            }
+
+            check_admin_referer(SkuadsFormsHelper::DO_MANUAL_SYNC);
+
             $enabled = get_option(SkuadsFormsHelper::ENABLED, true);
 
             if (! (SkuadsFormsHelper::elementorEnabled() && $enabled)) {
@@ -344,9 +354,18 @@ if (! class_exists('SkuadsForms')) {
             return true;
         }
 
+        public function sanitise_forms($forms)
+        {
+            if (! is_array($forms)) {
+                return [];
+            }
+
+            return array_values(array_map('sanitize_text_field', $forms));
+        }
+
         public function sanitise_site_key($siteKey)
         {
-            $siteKey = trim($siteKey);
+            $siteKey = sanitize_text_field((string) $siteKey);
 
             if (! $this->is_valid_site_key($siteKey) || empty($siteKey)) {
                 add_settings_error(
@@ -362,7 +381,7 @@ if (! class_exists('SkuadsForms')) {
 
         public function sanitise_api_key($apiToken)
         {
-            $apiToken = trim($apiToken);
+            $apiToken = sanitize_text_field((string) $apiToken);
 
             if (strlen($apiToken) !== 64 && ! empty($apiToken)) {
                 add_settings_error(
@@ -383,7 +402,7 @@ if (! class_exists('SkuadsForms')) {
 
         public function add_feedback_message($group, $code)
         {
-            $data = json_encode([
+            $data = wp_json_encode([
                 'group' => $group,
                 'code' => $code,
             ]);
@@ -399,7 +418,7 @@ if (! class_exists('SkuadsForms')) {
                 'wordpress_version' => get_bloginfo('version'),
             ];
 
-            SkuadsFormsHelper::log($message.' '.json_encode($data));
+            SkuadsFormsHelper::log($message.' '.wp_json_encode($data));
         }
 
         private function prepare_record_data($record)

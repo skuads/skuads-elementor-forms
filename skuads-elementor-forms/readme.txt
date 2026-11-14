@@ -2,8 +2,9 @@
 Contributors: skuads
 Tags: skuads, elementor, forms, crm, leads
 Requires at least: 4.6
-Tested up to: 5.9.2
-Stable tag: 0.0.3
+Tested up to: 7.1
+Stable tag: 0.0.4
+Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -39,6 +40,9 @@ Copyright (C) 2026 Skuads. The Skuads Elementor Forms plugin was created by Skua
 This plugin is free software licensed under the GNU General Public License, version 2 or any later version (GPL-2.0-or-later). See LICENSE.md in the source repository for details.
 
 == Changelog ==
+
+= 0.0.4 =
+* Escape all admin output, add a nonce and capability check to the manual sync, sanitize saved settings.
 
 = 0.0.3 =
 * Add stable submission identities so repeated manual syncs do not create duplicate leads.
