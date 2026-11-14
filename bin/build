@@ -6,9 +6,9 @@ cd -- "$script_dir"
 
 cd ..
 
-if [[ "$@" != 'dev' ]] && [[ "$@" != "staging" ]] && [[ "$@" != 'prod' ]]
+if [[ "$@" != 'dev' ]] && [[ "$@" != 'main' ]]
 then
-    echo "Environment should be 'dev', 'staging' or 'prod'"
+    echo "Environment should be 'dev' or 'main'"
     exit 1
 fi
 

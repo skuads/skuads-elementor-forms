@@ -18,7 +18,7 @@ Elementor submissions.
 - Manually synchronizes the 30 most recent submissions.
 - Includes stable submission identifiers and normalized UTC timestamps to prevent
   duplicate leads during repeated manual synchronizations.
-- Provides separate development, staging, and production API configurations.
+- Provides separate API configurations for the `dev` and `main` environments.
 
 ## Requirements
 
@@ -60,7 +60,9 @@ Build the plugin for the required environment from the repository root:
 bin/build dev
 ```
 
-Valid environments are `dev`, `staging`, and `prod`.
+Valid environments are `dev` and `main`, matching the repository branches:
+`dev` uses the development endpoints and `main` uses the production Skuads
+application (app.skuads.com).
 
 The command creates:
 
@@ -95,13 +97,13 @@ find skuads-elementor-forms tests settings -name '*.php' -print0 \
 Create a production archive with:
 
 ```bash
-bin/build prod
+bin/build main
 ```
 
 The release archive is written to:
 
 ```text
-dist/prod/skuads-elementor-forms.zip
+dist/main/skuads-elementor-forms.zip
 ```
 
 Before releasing a new version:
@@ -113,6 +115,18 @@ Before releasing a new version:
 4. Build and install the production archive on a test WordPress website.
 5. Confirm the supported WordPress and Elementor Pro versions before updating
    the compatibility metadata.
+
+### GitHub releases
+
+The `release` GitHub Actions workflow builds the plugin on every push and
+attaches the zip to a GitHub release:
+
+- `main`: release `v<Version>`, using the `Version` header of
+  `skuads-elementor-forms.php` and the matching `readme.txt` changelog entry as
+  notes. It is marked as the latest release. Pushing `main` again without
+  changing the version replaces the zip of that release.
+- `dev`: pre-release `dev-build`, recreated on every push. It uses the
+  development endpoints and must not be installed on client websites.
 
 ### Internal release helper
 
