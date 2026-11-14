@@ -1,0 +1,73 @@
+name: Release plugin zip
+
+# Builds the plugin on every push to dev or main and attaches the zip to a
+# GitHub release:
+# - main: release "v<Version>" (Version header of the main plugin file),
+#   marked as the latest release. Pushing main again with the same version
+#   replaces the zip of that release.
+# - dev: pre-release "dev-build", recreated on every push. This zip uses the
+#   development endpoints and must not be installed on client websites.
+
+on:
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.ref_name == 'dev' || github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      ZIP: dist/${{ github.ref_name }}/skuads-elementor-forms.zip
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v5
+
+      - name: Build the plugin
+        run: bash bin/build "$GITHUB_REF_NAME"
+
+      - name: Read the plugin version
+        run: |
+          version="$(grep -m1 '^Version:' skuads-elementor-forms/skuads-elementor-forms.php | awk '{print $2}')"
+          if [ -z "$version" ]; then
+            echo "No Version header found in skuads-elementor-forms.php"
+            exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - name: Publish the main release
+        if: github.ref_name == 'main'
+        run: |
+          tag="v$VERSION"
+          awk -v v="= $VERSION =" '$0 == v {found=1; next} /^= / {found=0} found' \
+            skuads-elementor-forms/readme.txt > notes.md
+          [ -s notes.md ] || echo "Skuads Elementor Forms $VERSION" > notes.md
+
+          if gh release view "$tag" > /dev/null 2>&1; then
+            gh release upload "$tag" "$ZIP" --clobber
+            gh release edit "$tag" --notes-file notes.md --latest
+          else
+            gh release create "$tag" "$ZIP" \
+              --target "$GITHUB_SHA" \
+              --title "Skuads Elementor Forms $VERSION" \
+              --notes-file notes.md \
+              --latest
+          fi
+
+      - name: Publish the dev pre-release
+        if: github.ref_name == 'dev'
+        run: |
+          gh release delete dev-build --cleanup-tag --yes > /dev/null 2>&1 || true
+          gh release create dev-build "$ZIP" \
+            --target "$GITHUB_SHA" \
+            --title "Dev build $VERSION (${GITHUB_SHA::7})" \
+            --notes "Built from dev at $GITHUB_SHA. Uses the development endpoints: do not install on client websites." \
+            --prerelease

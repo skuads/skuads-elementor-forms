@@ -116,6 +116,18 @@ Before releasing a new version:
 5. Confirm the supported WordPress and Elementor Pro versions before updating
    the compatibility metadata.
 
+### GitHub releases
+
+The `release` GitHub Actions workflow builds the plugin on every push and
+attaches the zip to a GitHub release:
+
+- `main`: release `v<Version>`, using the `Version` header of
+  `skuads-elementor-forms.php` and the matching `readme.txt` changelog entry as
+  notes. It is marked as the latest release. Pushing `main` again without
+  changing the version replaces the zip of that release.
+- `dev`: pre-release `dev-build`, recreated on every push. It uses the
+  development endpoints and must not be installed on client websites.
+
 ### Internal release helper
 
 `bin/release <environment>` builds the selected environment and copies its archive
