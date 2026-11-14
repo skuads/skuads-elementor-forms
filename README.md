@@ -151,9 +151,12 @@ For help with Skuads or this integration, visit the
 
 ## Copyright and license
 
-Copyright (C) 2026 to present Skuads. The Skuads Elementor Forms plugin was created
+Copyright (C) 2026 Skuads. The Skuads Elementor Forms plugin was created
 by Skuads and belongs to Skuads. Skuads is the copyright holder of the plugin
 and its original source code.
+
+The copyright year is updated automatically every January by the
+`update-copyright-year` GitHub Actions workflow.
 
 This project is free software licensed under the GNU General Public License,
 version 2 or any later version (`GPL-2.0-or-later`). See [LICENSE.md](LICENSE.md)

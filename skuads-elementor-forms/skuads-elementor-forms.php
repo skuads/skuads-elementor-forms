@@ -11,7 +11,7 @@ Plugin URI: https://skuads.com/
 */
 
 /*
- * Copyright (C) 2026 to present Skuads.
+ * Copyright (C) 2026 Skuads.
  * Created by Skuads and owned by Skuads.
  * SPDX-License-Identifier: GPL-2.0-or-later
  */

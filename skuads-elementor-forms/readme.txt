@@ -35,7 +35,7 @@ Telephone: +33 4 82 29 60 75
 
 == Copyright and License ==
 
-Copyright (C) 2026 to present Skuads. The Skuads Elementor Forms plugin was created by Skuads and belongs to Skuads. Skuads is the copyright holder of the plugin and its original source code.
+Copyright (C) 2026 Skuads. The Skuads Elementor Forms plugin was created by Skuads and belongs to Skuads. Skuads is the copyright holder of the plugin and its original source code.
 
 This plugin is free software licensed under the GNU General Public License, version 2 or any later version (GPL-2.0-or-later). See LICENSE.md in the source repository for details.
 
