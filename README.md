@@ -1,18 +1,20 @@
 # Skuads Elementor Forms
 
-Official WordPress plugin that connects Elementor Pro forms to Skuads.
+Official WordPress plugin that connects Elementor Pro forms to the Skuads application.
 
 The plugin discovers Elementor forms across WordPress pages, posts, custom post
-types, and Elementor templates. It sends new submissions to Skuads automatically
-and can manually synchronize the 30 most recent Elementor submissions.
+types, and Elementor templates. It sends new submissions to the Skuads
+application automatically and can manually synchronize the 30 most recent
+Elementor submissions.
 
 ## Features
 
-- Connects a WordPress website to Skuads using a Site UUID and API key.
+- Connects a WordPress website to the Skuads application using a Site UUID and
+  API key.
 - Discovers forms in Elementor pages and templates, including forms that have no
   previous submissions.
 - Lets administrators select which Elementor forms should be connected.
-- Sends new form submissions to Skuads automatically.
+- Sends new form submissions to the Skuads application automatically.
 - Manually synchronizes the 30 most recent submissions.
 - Includes stable submission identifiers and normalized UTC timestamps to prevent
   duplicate leads during repeated manual synchronizations.
@@ -130,8 +132,8 @@ an all-in-one marketing application with expert support. Its services include
 website creation and management, SEO, online advertising, social media, content
 creation, CRM, lead management, and marketing automation.
 
-This plugin connects Elementor Pro form submissions to the Skuads platform so
-businesses can centralize and process their leads in Skuads.
+This plugin connects Elementor Pro form submissions to the Skuads application
+so businesses can centralize and process their leads in the application.
 
 ### Company information
 

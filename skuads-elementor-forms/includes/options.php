@@ -2,7 +2,7 @@
 defined('ABSPATH') or exit('Restricted access!');
 ?>
 <div class="wrap">
-    <h1>Connect Elementor Forms to Skuads </h1>
+    <h1>Connect Elementor Forms to the Skuads application</h1>
 
     <hr />
 
@@ -20,7 +20,7 @@ defined('ABSPATH') or exit('Restricted access!');
 
             <?php if (get_option(SkuadsFormsHelper::CONNECTED)) { ?>
                 <div class="notice notice-success">
-                    <p><strong>Your Elementor forms are connected to Skuads.</strong></p>
+                    <p><strong>Your Elementor forms are connected to the Skuads application.</strong></p>
                 </div>
             <?php } ?>
 
@@ -118,7 +118,7 @@ defined('ABSPATH') or exit('Restricted access!');
                         <td>
                             <?php submit_button('Manually sync entries'); ?>
                             <p class="description">
-                                This will send the last 30 entries to Skuads.
+                                This will send the last 30 entries to the Skuads application.
                             </p>
                         </td>
                     </tr>

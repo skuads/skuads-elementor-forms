@@ -8,13 +8,13 @@ Stable tag: 0.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Connect Elementor Pro forms to Skuads and centralize form submissions in the Skuads platform.
+Connect Elementor Pro forms to the Skuads application and centralize form submissions in the application.
 
 == Description ==
 
 Skuads Elementor Forms is the official integration between Elementor Pro Forms and Skuads.
 
-The plugin discovers forms in Elementor pages and templates, lets administrators choose which forms to connect, sends new submissions to Skuads automatically, and can manually synchronize the 30 most recent submissions.
+The plugin discovers forms in Elementor pages and templates, lets administrators choose which forms to connect, sends new submissions to the Skuads application automatically, and can manually synchronize the 30 most recent submissions.
 
 Repeated manual synchronizations include stable submission identities to prevent duplicate leads.
 
