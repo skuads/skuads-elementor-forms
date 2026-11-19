@@ -2,7 +2,7 @@
 
 Copyright (C) 2026 Skuads.
 
-The Skuads Elementor Forms plugin was created by Skuads and belongs to Skuads.
+The Skuads Forms for Elementor plugin was created by Skuads and belongs to Skuads.
 Skuads is the copyright holder of the plugin and its original source code.
 
 This program is free software; you can redistribute it and/or modify it under

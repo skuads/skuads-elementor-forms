@@ -1,9 +1,13 @@
 <?php
 /*
-Plugin Name: Skuads Elementor Forms
-Description: Skuads Elementor Forms
+Plugin Name: Skuads Forms for Elementor
+Description: Sends Elementor Pro form submissions to the Skuads application.
 Author: Skuads
-Version: 0.0.4
+Version: 0.0.5
+Requires Plugins: elementor
+Requires at least: 6.5
+Requires PHP: 7.4
+Text Domain: skuads-elementor-forms
 Author URI: https://skuads.com/
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -58,7 +62,7 @@ if (! class_exists('SkuadsFormsHelper')) {
         {
             return in_array(
                 'elementor-pro/elementor-pro.php',
-                apply_filters('active_plugins', get_option('active_plugins'))
+                apply_filters('active_plugins', get_option('active_plugins')) // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- core WordPress filter.
             );
         }
 
@@ -88,13 +92,14 @@ if (! class_exists('SkuadsFormsHelper')) {
 
         public static function log($log)
         {
-            if (true === WP_DEBUG) {
-                if (is_array($log) || is_object($log)) {
-                    error_log(print_r($log, true));
-                } else {
-                    error_log($log);
-                }
+            // Connection errors are only logged when the site owner enables WP_DEBUG_LOG.
+            if (! (defined('WP_DEBUG_LOG') && WP_DEBUG_LOG)) {
+                return;
             }
+
+            $message = (is_array($log) || is_object($log)) ? wp_json_encode($log) : (string) $log;
+
+            error_log($message); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
         }
 
         public static function feedbackMessage($section)
@@ -183,6 +188,7 @@ if (! class_exists('SkuadsForms')) {
         {
             add_action('admin_init', [$this, 'init_settings']);
             add_action('admin_menu', [$this, 'init_menu']);
+            add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_scripts']);
 
             add_action('add_option_'.SkuadsFormsHelper::SITE_KEY, [$this, 'connect'], 999, 0);
             add_action('add_option_'.SkuadsFormsHelper::API_TOKEN, [$this, 'connect'], 999, 0);
@@ -219,6 +225,35 @@ if (! class_exists('SkuadsForms')) {
                 SkuadsFormsHelper::SLUG,
                 [$this, 'options_form'],
                 SkuadsFormsHelper::asset('assets/icon.svg'),
+            );
+        }
+
+        public function enqueue_admin_scripts($hook)
+        {
+            if ($hook !== 'toplevel_page_'.SkuadsFormsHelper::SLUG) {
+                return;
+            }
+
+            $handle = SkuadsFormsHelper::SLUG.'-admin';
+
+            wp_enqueue_script(
+                $handle,
+                SkuadsFormsHelper::asset('assets/admin.js'),
+                ['jquery'],
+                (string) filemtime(SkuadsFormsHelper::filePath('assets/admin.js')),
+                true
+            );
+
+            wp_add_inline_script(
+                $handle,
+                'window.skuadsForms = '.wp_json_encode([
+                    'slug' => SkuadsFormsHelper::SLUG,
+                    'saved' => SkuadsFormsHelper::SAVED,
+                    'siteKey' => SkuadsFormsHelper::SITE_KEY,
+                    'apiToken' => SkuadsFormsHelper::API_TOKEN,
+                    'enabled' => SkuadsFormsHelper::ENABLED,
+                ]).';',
+                'before'
             );
         }
 
@@ -509,7 +544,7 @@ if (! class_exists('SkuadsForms')) {
         }
     }
 
-    $skuadsForms = new SkuadsForms();
+    $skuads_forms_instance = new SkuadsForms();
 }
 
 register_uninstall_hook(__FILE__, 'skuads_forms_uninstall_hook');

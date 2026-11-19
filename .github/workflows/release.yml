@@ -46,7 +46,7 @@ jobs:
           tag="v$VERSION"
           awk -v v="= $VERSION =" '$0 == v {found=1; next} /^= / {found=0} found' \
             skuads-elementor-forms/readme.txt > notes.md
-          [ -s notes.md ] || echo "Skuads Elementor Forms $VERSION" > notes.md
+          [ -s notes.md ] || echo "Skuads Forms for Elementor $VERSION" > notes.md
 
           if gh release view "$tag" > /dev/null 2>&1; then
             gh release upload "$tag" "$PLUGIN_ZIP" --clobber
@@ -54,7 +54,7 @@ jobs:
           else
             gh release create "$tag" "$PLUGIN_ZIP" \
               --target "$GITHUB_SHA" \
-              --title "Skuads Elementor Forms $VERSION" \
+              --title "Skuads Forms for Elementor $VERSION" \
               --notes-file notes.md \
               --latest
           fi
