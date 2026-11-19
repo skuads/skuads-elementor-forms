@@ -71,11 +71,11 @@ $skuads_forms_saved = get_option(SkuadsFormsHelper::SAVED, time());
                     <td>
                         <table>
                             <?php
-                                $savedForms = get_option(SkuadsFormsHelper::FORMS, []);
-        if (! is_array($savedForms)) {
-            $savedForms = [];
+                                $skuads_forms_saved_forms = get_option(SkuadsFormsHelper::FORMS, []);
+        if (! is_array($skuads_forms_saved_forms)) {
+            $skuads_forms_saved_forms = [];
         }
-        foreach (SkuadsFormsHelper::elementorForms() as $form) {
+        foreach (SkuadsFormsHelper::elementorForms() as $skuads_forms_form) {
             ?>
                             <tr>
                                 <td style="padding: 0px 10px 15px 0px;">
@@ -83,10 +83,10 @@ $skuads_forms_saved = get_option(SkuadsFormsHelper::SAVED, time());
                                         <input
                                             type="checkbox"
                                             name="<?php echo esc_attr(SkuadsFormsHelper::FORMS); ?>[]"
-                                            value="<?php echo esc_attr($form['id']); ?>"
-                                            <?php checked(in_array($form['id'], $savedForms)); ?>
+                                            value="<?php echo esc_attr($skuads_forms_form['id']); ?>"
+                                            <?php checked(in_array($skuads_forms_form['id'], $skuads_forms_saved_forms)); ?>
                                         />
-                                        <?php echo esc_html($form['name']); ?>
+                                        <?php echo esc_html($skuads_forms_form['name']); ?>
                                     </label>
                                 </td>
                             </tr>
@@ -139,49 +139,3 @@ $skuads_forms_saved = get_option(SkuadsFormsHelper::SAVED, time());
         </div>
     <?php } ?>
 </div>
-<script>
-    jQuery('#<?php echo esc_js(SkuadsFormsHelper::SLUG); ?>-form-manualsync').on('submit', function(event) {
-        event.preventDefault();
-        var form = jQuery('#<?php echo esc_js(SkuadsFormsHelper::SLUG); ?>-form-manualsync');
-        var button = form.find('input[type=submit]');
-        var buttonText = button.val();
-        var feedback = form.find('.<?php echo esc_js(SkuadsFormsHelper::SLUG); ?>-feedback');
-
-        jQuery.ajax({
-            type: "POST",
-            url: form.attr('action'),
-            data: form.serialize(),
-            beforeSend: function() {
-                button.prop('disabled', true);
-                button.val('Syncing ...');
-                feedback.html('');
-            },
-            success: function(data) {
-                button.prop('disabled', false);
-                button.val(buttonText);
-                feedback.html(`
-                    <div class="notice is-dismissible inline notice-success" style="max-width:25em">
-                        <p><b>Entries synced successfully</b></p>
-                    </div>
-                `);
-            }
-        });
-    });
-
-    jQuery('#<?php echo esc_js(SkuadsFormsHelper::SLUG); ?>-form-options').on('submit', function() {
-        var button = jQuery('#<?php echo esc_js(SkuadsFormsHelper::SLUG); ?>-form-options').find('#<?php echo esc_js(SkuadsFormsHelper::SLUG); ?>-setup');
-        button.prop('disabled', true);
-        button.val('Connecting ...');
-    });
-
-    jQuery('#<?php echo esc_js(SkuadsFormsHelper::SITE_KEY); ?>,#<?php echo esc_js(SkuadsFormsHelper::API_TOKEN); ?>').on('change', function(event) {
-        jQuery('#<?php echo esc_js(SkuadsFormsHelper::SAVED); ?>').val(Date.now());
-    });
-
-    jQuery('#<?php echo esc_js(SkuadsFormsHelper::ENABLED); ?>').on('change', function(event) {
-        if (event.target.value) {
-            jQuery('#<?php echo esc_js(SkuadsFormsHelper::SAVED); ?>').val(Date.now());
-        }
-        jQuery('.depends-on-enabled').toggleClass('hidden');
-    });
-</script>

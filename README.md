@@ -1,4 +1,4 @@
-# Skuads Elementor Forms
+# Skuads Forms for Elementor
 
 Official WordPress plugin that connects Elementor Pro forms to the Skuads application.
 
@@ -71,7 +71,7 @@ dist/<environment>/skuads-elementor-forms.zip
 ```
 
 Upload this archive from **WordPress Admin > Plugins > Add New > Upload Plugin**,
-then activate **Skuads Elementor Forms**.
+then activate **Skuads Forms for Elementor**.
 
 In WordPress Admin, open **Skuads Forms**, enter the Site UUID and API key, select
 the forms to capture, and save the connection.
@@ -162,7 +162,7 @@ For help with Skuads or this integration, visit the
 
 ## Copyright and license
 
-Copyright (C) 2026 Skuads. The Skuads Elementor Forms plugin was created
+Copyright (C) 2026 Skuads. The Skuads Forms for Elementor plugin was created
 by Skuads and belongs to Skuads. Skuads is the copyright holder of the plugin
 and its original source code.
 
