@@ -3,11 +3,11 @@
 Plugin Name: Skuads Forms for Elementor
 Description: Sends Elementor Pro form submissions to the Skuads application.
 Author: Skuads
-Version: 0.0.5
+Version: 0.0.6
 Requires Plugins: elementor
 Requires at least: 6.5
 Requires PHP: 7.4
-Text Domain: skuads-elementor-forms
+Text Domain: skuads-forms-for-elementor
 Author URI: https://skuads.com/
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -62,7 +62,7 @@ if (! class_exists('SkuadsFormsHelper')) {
         {
             return in_array(
                 'elementor-pro/elementor-pro.php',
-                apply_filters('active_plugins', get_option('active_plugins')) // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- core WordPress filter.
+                (array) apply_filters('active_plugins', get_option('active_plugins', [])) // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- core WordPress filter.
             );
         }
 
@@ -88,6 +88,67 @@ if (! class_exists('SkuadsFormsHelper')) {
         public static function elementorSubmissions()
         {
             return ElementorQuery::get_instance();
+        }
+
+        /**
+         * Nothing is sent to Skuads until an administrator has enabled the
+         * plugin and saved a valid Site UUID and API key.
+         */
+        public static function isReadyToSend()
+        {
+            if (! self::elementorEnabled() || ! get_option(self::ENABLED, false)) {
+                return false;
+            }
+
+            $siteKey = (string) get_option(self::SITE_KEY, '');
+            $apiToken = (string) get_option(self::API_TOKEN, '');
+
+            return self::isValidSiteKey($siteKey) && strlen($apiToken) === 64;
+        }
+
+        public static function isValidSiteKey($siteKey)
+        {
+            return (bool) preg_match(
+                '/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/Di',
+                (string) $siteKey
+            );
+        }
+
+        /**
+         * IDs of the forms the administrator chose to capture.
+         */
+        public static function selectedFormIds()
+        {
+            $forms = get_option(self::FORMS, []);
+
+            if (! is_array($forms)) {
+                return [];
+            }
+
+            return array_values(array_filter(array_map('strval', $forms), 'strlen'));
+        }
+
+        /**
+         * Whether a submission's form (its Elementor element ID) was selected.
+         * Saved IDs can be the element ID or "<post ID>_<element ID>".
+         */
+        public static function isFormSelected($formId, array $selectedFormIds)
+        {
+            $formId = (string) $formId;
+
+            if ($formId === '') {
+                return false;
+            }
+
+            $suffix = '_'.$formId;
+
+            foreach ($selectedFormIds as $selectedFormId) {
+                if ($selectedFormId === $formId || substr($selectedFormId, -strlen($suffix)) === $suffix) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public static function log($log)
@@ -274,10 +335,15 @@ if (! class_exists('SkuadsForms')) {
 
         public function post_webhook($record, $handler = null)
         {
-            $enabled = get_option(SkuadsFormsHelper::ENABLED, true);
+            if (! SkuadsFormsHelper::isReadyToSend()) {
+                return false;
+            }
 
-            if (! (SkuadsFormsHelper::elementorEnabled() && $enabled)) {
-                return;
+            if (! SkuadsFormsHelper::isFormSelected(
+                $record->get_form_settings('id'),
+                SkuadsFormsHelper::selectedFormIds()
+            )) {
+                return false;
             }
 
             $siteKey = get_option(SkuadsFormsHelper::SITE_KEY);
@@ -305,17 +371,23 @@ if (! class_exists('SkuadsForms')) {
 
             check_admin_referer(SkuadsFormsHelper::DO_MANUAL_SYNC);
 
-            $enabled = get_option(SkuadsFormsHelper::ENABLED, true);
+            if (! SkuadsFormsHelper::isReadyToSend()) {
+                return false;
+            }
 
-            if (! (SkuadsFormsHelper::elementorEnabled() && $enabled)) {
-                return;
+            $selectedFormIds = SkuadsFormsHelper::selectedFormIds();
+
+            if (empty($selectedFormIds)) {
+                return false;
             }
 
             $siteKey = get_option(SkuadsFormsHelper::SITE_KEY);
             $apiToken = get_option(SkuadsFormsHelper::API_TOKEN);
 
+            // Read a wider window, then keep only the 30 most recent
+            // submissions of the selected forms.
             $submissions = SkuadsFormsHelper::elementorSubmissions()->get_submissions([
-                'per_page' => 30,
+                'per_page' => 200,
                 'with_meta' => true,
                 'with_form_fields' => true,
             ]);
@@ -328,7 +400,19 @@ if (! class_exists('SkuadsForms')) {
             ];
 
             foreach (($submissions['data'] ?? []) as $record) {
+                if (! SkuadsFormsHelper::isFormSelected($record['form']['element_id'] ?? '', $selectedFormIds)) {
+                    continue;
+                }
+
                 $data['submissions'][] = $this->prepare_record_data($record);
+
+                if (count($data['submissions']) >= 30) {
+                    break;
+                }
+            }
+
+            if (empty($data['submissions'])) {
+                return false;
             }
 
             $response = $this->post(SKUADS_FORMS_ENDPOINT_WEBHOOK, $data, $apiToken);
@@ -340,7 +424,7 @@ if (! class_exists('SkuadsForms')) {
         {
             $siteKey = get_option(SkuadsFormsHelper::SITE_KEY);
             $apiToken = get_option(SkuadsFormsHelper::API_TOKEN);
-            $enabled = get_option(SkuadsFormsHelper::ENABLED, true);
+            $enabled = get_option(SkuadsFormsHelper::ENABLED, false);
             $forms = get_option(SkuadsFormsHelper::FORMS, []);
 
             // it has been disabled.
@@ -402,7 +486,7 @@ if (! class_exists('SkuadsForms')) {
         {
             $siteKey = sanitize_text_field((string) $siteKey);
 
-            if (! $this->is_valid_site_key($siteKey) || empty($siteKey)) {
+            if (! SkuadsFormsHelper::isValidSiteKey($siteKey)) {
                 add_settings_error(
                     SkuadsFormsHelper::SITE_KEY,
                     esc_attr('settings_updated'),
@@ -508,13 +592,6 @@ if (! class_exists('SkuadsForms')) {
             ];
         }
 
-        private function is_valid_site_key($siteKey)
-        {
-            $UUIDv4 = '/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/Di';
-
-            return preg_match($UUIDv4, $siteKey);
-        }
-
         private function post($url, $data, $apiToken)
         {
             $response = wp_remote_post($url, [
@@ -570,7 +647,7 @@ function skuads_forms_activation_hook()
     update_option(SkuadsFormsHelper::SITE_KEY, get_option(SkuadsFormsHelper::SITE_KEY, ''));
     update_option(SkuadsFormsHelper::API_TOKEN, get_option(SkuadsFormsHelper::API_TOKEN, ''));
     update_option(SkuadsFormsHelper::CONNECTED, get_option(SkuadsFormsHelper::CONNECTED, 0));
-    update_option(SkuadsFormsHelper::ENABLED, get_option(SkuadsFormsHelper::ENABLED, 1));
+    update_option(SkuadsFormsHelper::ENABLED, get_option(SkuadsFormsHelper::ENABLED, 0));
     update_option(SkuadsFormsHelper::AUTOSYNC, get_option(SkuadsFormsHelper::AUTOSYNC, 1));
     update_option(SkuadsFormsHelper::SAVED, get_option(SkuadsFormsHelper::SAVED, time()));
     update_option(SkuadsFormsHelper::FORMS, get_option(SkuadsFormsHelper::FORMS, '[]'));

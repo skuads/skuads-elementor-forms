@@ -3,7 +3,7 @@ Contributors: skuads21
 Tags: skuads, elementor, forms, crm, leads
 Requires at least: 6.5
 Tested up to: 7.1
-Stable tag: 0.0.5
+Stable tag: 0.0.6
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -24,11 +24,11 @@ For more information, visit https://skuads.com/ or the Skuads help center at htt
 
 == External services ==
 
-This plugin connects to the Skuads application (https://app.skuads.com/), a service provided by Skuads, the author of this plugin. The service is needed to receive the website's Elementor form submissions as leads in the site owner's Skuads account. Nothing is sent until an administrator enables the plugin and saves a Site UUID and API key.
+This plugin connects to the Skuads application (https://app.skuads.com/), a service provided by Skuads, the author of this plugin. The service is needed to receive the website's Elementor form submissions as leads in the site owner's Skuads account. Nothing is sent until an administrator enables the plugin, saves a valid Site UUID and API key, and selects the forms to capture. Submissions of forms that are not selected are never sent.
 
 * When an administrator saves the settings, the plugin sends the Site UUID, the API key (as a Bearer token), and the ID and name of each selected form to https://app.skuads.com/api/connect-leadforms to check the connection.
-* Each time a visitor submits an Elementor Pro form, the plugin sends the Site UUID, the form ID and name, the submitted field values (which can include personal data such as name, email address, phone number, or message), and the submission date to https://app.skuads.com/webhook/leadforms.
-* When an administrator clicks "Manually sync entries", the plugin sends the same data for the 30 most recent Elementor Pro form submissions to https://app.skuads.com/webhook/leadforms.
+* Each time a visitor submits one of the selected Elementor Pro forms, the plugin sends the Site UUID, the form ID and name, the submitted field values (which can include personal data such as name, email address, phone number, or message), and the submission date to https://app.skuads.com/webhook/leadforms.
+* When an administrator clicks "Manually sync entries", the plugin sends the same data for the 30 most recent submissions of the selected forms to https://app.skuads.com/webhook/leadforms.
 
 Skuads terms of use: https://support.skuads.com/en/legal/terms/
 Skuads privacy policy: https://support.skuads.com/en/legal/privacy/
@@ -51,6 +51,10 @@ Copyright (C) 2026 Skuads. The Skuads Forms for Elementor plugin was created by 
 This plugin is free software licensed under the GNU General Public License, version 2 or any later version (GPL-2.0-or-later). See LICENSE.md in the source repository for details.
 
 == Changelog ==
+
+= 0.0.6 =
+* Send submissions only once the plugin is enabled and configured, and only for the selected forms (automatic and manual sync).
+* The plugin is disabled until an administrator enables it.
 
 = 0.0.5 =
 * Rename the plugin to Skuads Forms for Elementor.
