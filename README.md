@@ -83,6 +83,7 @@ The tests do not require a complete WordPress installation:
 ```bash
 php tests/form-discovery.php
 php tests/submission-identity.php
+php tests/sending-rules.php
 ```
 
 Check the syntax of all PHP files with:
