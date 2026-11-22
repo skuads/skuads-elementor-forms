@@ -1,0 +1,56 @@
+#!/bin/bash
+# Prepares the WordPress.org SVN working copy in ./svn: trunk and tags/<version>
+# receive the production build of the plugin. Nothing is sent: review the
+# changes, then commit them yourself with the command printed at the end.
+
+set -euo pipefail
+cd -- "$(dirname "$0")/.."
+
+svn_url='https://plugins.svn.wordpress.org/skuads-forms-for-elementor'
+version="$(grep -m1 'Version:' skuads-elementor-forms/skuads-elementor-forms.php | grep -oE '[^ ]+$')"
+stable_tag="$(grep -m1 'Stable tag:' skuads-elementor-forms/readme.txt | grep -oE '[^ ]+$')"
+
+if [ "$version" != "$stable_tag" ]
+then
+    echo "Version ($version) and readme.txt Stable tag ($stable_tag) differ."
+    exit 1
+fi
+
+if [ -d svn/.svn ]
+then
+    svn update --quiet svn
+else
+    rm -rf svn
+    svn checkout --quiet "$svn_url" svn
+fi
+
+if svn ls "$svn_url/tags/$version" > /dev/null 2>&1
+then
+    echo "Version $version is already released on WordPress.org: bump the version first."
+    exit 1
+fi
+
+copy_plugin() {
+    mkdir -p "$1"
+    rsync -rc --delete \
+        --exclude=.svn --exclude=.DS_Store \
+        --exclude=/build --exclude=/vendor --exclude=/composer.lock \
+        skuads-elementor-forms/ "$1/"
+    cp settings/main.php "$1/includes/settings.php"
+    cp LICENSE.md "$1/LICENSE.md"
+}
+
+copy_plugin svn/trunk
+copy_plugin "svn/tags/$version"
+
+cd svn
+svn add --force --quiet trunk tags
+svn status | { grep '^!' || true; } | cut -c9- | while IFS= read -r missing
+do
+    svn delete --quiet "$missing"
+done
+
+svn status
+echo
+echo "Ready to release $version. Send it with:"
+echo "  svn commit $(pwd) --username skuads21 -m 'Release $version'"
