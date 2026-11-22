@@ -36,7 +36,8 @@ The Site UUID and API key are available from the
 - Bash
 - PHP CLI
 - `zip`
-- `svn` and `rsync` only when maintaining the WordPress.org distribution
+- `svn` (`brew install subversion`) and `rsync` only when releasing on
+  WordPress.org
 
 ## Repository structure
 
@@ -133,9 +134,23 @@ to the Skuads application download directory expected by the original monorepo
 layout. It is not portable to a standalone clone unless that directory layout is
 available.
 
-`bin/download` is a legacy WordPress.org SVN synchronization script. It still
-expects the former `assets/` and `trunk/` repository layout and must be updated
-before it can be used from this standalone repository.
+### WordPress.org release
+
+The plugin is published on WordPress.org as
+[skuads-forms-for-elementor](https://wordpress.org/plugins/skuads-forms-for-elementor/).
+WordPress.org distributes it from its SVN repository, not from GitHub.
+
+After `main` has the new version, run:
+
+```bash
+bin/svn
+```
+
+It checks out the SVN repository into `svn/` (ignored by Git), copies the
+production plugin into `trunk/` and `tags/<Version>`, and refuses to run if the
+version is already released or differs from the readme `Stable tag`. Nothing is
+sent: review `svn status`, then commit with the printed command, using the
+`skuads21` SVN password set in the WordPress.org profile (Account & Security).
 
 ## About Skuads
 
