@@ -147,8 +147,10 @@ bin/svn
 ```
 
 It checks out the SVN repository into `svn/` (ignored by Git), copies the
-production plugin into `trunk/` and `tags/<Version>`, and refuses to run if the
-version is already released or differs from the readme `Stable tag`. Nothing is
+production plugin into `trunk/` and `tags/<Version>`, and copies the plugin page
+icons from `wporg-assets/` into `assets/`. When the version is already
+released, only `assets/` is updated. It stops if the version differs from the
+readme `Stable tag`. Nothing is
 sent: review `svn status`, then commit with the printed command, using the
 `skuads21` SVN password set in the WordPress.org profile (Account & Security).
 

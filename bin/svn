@@ -1,6 +1,7 @@
 #!/bin/bash
 # Prepares the WordPress.org SVN working copy in ./svn: trunk and tags/<version>
-# receive the production build of the plugin. Nothing is sent: review the
+# receive the production build of the plugin, and assets/ the icons of the
+# plugin page from wporg-assets/. Nothing is sent: review the
 # changes, then commit them yourself with the command printed at the end.
 
 set -euo pipefail
@@ -24,10 +25,10 @@ else
     svn checkout --quiet "$svn_url" svn
 fi
 
+released=0
 if svn ls "$svn_url/tags/$version" > /dev/null 2>&1
 then
-    echo "Version $version is already released on WordPress.org: bump the version first."
-    exit 1
+    released=1
 fi
 
 copy_plugin() {
@@ -40,11 +41,24 @@ copy_plugin() {
     cp LICENSE.md "$1/LICENSE.md"
 }
 
-copy_plugin svn/trunk
-copy_plugin "svn/tags/$version"
+if [ "$released" = 1 ]
+then
+    echo "Version $version is already released: only the directory assets are updated."
+else
+    copy_plugin svn/trunk
+    copy_plugin "svn/tags/$version"
+fi
+
+# Icons and banners shown on the WordPress.org plugin page.
+mkdir -p svn/assets
+rsync -rc --delete --exclude=.svn --exclude=.DS_Store wporg-assets/ svn/assets/
 
 cd svn
-svn add --force --quiet trunk tags
+svn add --force --quiet trunk tags assets
+for image in assets/*.png
+do
+    [ -e "$image" ] && svn propset --quiet svn:mime-type image/png "$image"
+done
 svn status | { grep '^!' || true; } | cut -c9- | while IFS= read -r missing
 do
     svn delete --quiet "$missing"
@@ -52,5 +66,13 @@ done
 
 svn status
 echo
-echo "Ready to release $version. Send it with:"
-echo "  svn commit $(pwd) --username skuads21 -m 'Release $version'"
+if [ -z "$(svn status)" ]
+then
+    echo "Nothing to send."
+    exit 0
+fi
+
+message="Release $version"
+[ "$released" = 1 ] && message='Update plugin directory assets'
+echo "Ready. Send it with:"
+echo "  svn commit $(pwd) --username skuads21 -m '$message'"
